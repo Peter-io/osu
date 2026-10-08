@@ -323,9 +323,10 @@ namespace osu.Game.Screens.Edit
 
         private readonly List<HitObject> batchPendingDeletes = new List<HitObject>();
 
+        private readonly List<HitObject> batchPendingShifts = new List<HitObject>();
+
         private readonly HashSet<HitObject> batchPendingUpdates = new HashSet<HitObject>();
 
-        private readonly HashSet<HitObject> batchPendingShifts = new HashSet<HitObject>();
 
         /// <summary>
         /// Perform the provided action on every selected hitobject.
