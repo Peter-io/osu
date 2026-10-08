@@ -28,6 +28,11 @@ namespace osu.Game.Screens.Edit
         public EditorBeatmapProcessor(EditorBeatmap beatmap, Ruleset ruleset)
         {
             Beatmap = beatmap;
+
+            Beatmap.HitObjectAdded += updateBreak;
+            Beatmap.HitObjectRemoved += updateBreak;
+            Beatmap.HitObjectShifted += updateBreak;
+
             rulesetBeatmapProcessor = ruleset.CreateBeatmapProcessor(beatmap);
         }
 
@@ -40,66 +45,51 @@ namespace osu.Game.Screens.Edit
         {
             rulesetBeatmapProcessor?.PostProcess();
 
-            autoGenerateBreaks();
             ensureNewComboAfterBreaks();
         }
 
-        private void autoGenerateBreaks()
+        private void updateBreak(HitObject currentHitObject)
         {
-            var objectDuration = Beatmap.HitObjects.Select(ho => (ho.StartTime - ((ho as IHasTimePreempt)?.TimePreempt ?? 0), ho.GetEndTime())).ToHashSet();
+            var previousObject = Beatmap.HitObjects.LastOrDefault(h => h.GetEndTime() < currentHitObject.StartTime) ?? currentHitObject;
+            var nextObject = Beatmap.HitObjects.FirstOrDefault(h => h.StartTime > currentHitObject.StartTime) ?? currentHitObject;
 
-            if (objectDuration.SetEquals(objectDurationCache))
+            if (Beatmap.FindIndex(currentHitObject) >= 0)
+            {
+                insertBreakBetweenObjects(previousObject, currentHitObject);
+                insertBreakBetweenObjects(currentHitObject, nextObject);
+            }
+            else insertBreakBetweenObjects(previousObject, nextObject);
+        }
+
+        private void insertBreakBetweenObjects(HitObject Start, HitObject End)
+        {
+            // Keep track of the maximum end time encountered thus far.
+            // This handles cases like osu!mania's hold notes, which could have concurrent other objects after their start time.
+            // Note that we're relying on the implicit assumption that objects are sorted by start time,
+            // which is why similar tracking is not done for start time.
+            double currentMaxEndTime = Math.Max(double.MinValue, Start.GetEndTime());
+
+            if (Beatmap.Breaks.Any(b => b.Intersects(new BreakPeriod(Start.GetEndTime(), End.StartTime))))
+                Beatmap.Breaks.RemoveAll(b => b.Intersects(new BreakPeriod(Start.GetEndTime(), End.StartTime)));
+
+            if ((End.StartTime - currentMaxEndTime) < BreakPeriod.MIN_GAP_DURATION)
                 return;
 
-            objectDurationCache = objectDuration;
+            double breakStartTime = currentMaxEndTime + BreakPeriod.GAP_BEFORE_BREAK;
 
-            Beatmap.Breaks.RemoveAll(b => b is not ManualBreakPeriod);
+            double breakEndTime = End.StartTime;
 
-            foreach (var manualBreak in Beatmap.Breaks.ToList())
-            {
-                if (manualBreak.EndTime <= Beatmap.HitObjects.FirstOrDefault()?.StartTime
-                    || manualBreak.StartTime >= Beatmap.GetLastObjectTime()
-                    || Beatmap.HitObjects.Any(ho => ho.StartTime <= manualBreak.EndTime && ho.GetEndTime() >= manualBreak.StartTime))
-                {
-                    Beatmap.Breaks.Remove(manualBreak);
-                }
-            }
+            if (End is IHasTimePreempt hasTimePreempt)
+                breakEndTime -= hasTimePreempt.TimePreempt;
+            else
+                breakEndTime -= Math.Max(BreakPeriod.GAP_AFTER_BREAK, Beatmap.ControlPointInfo.TimingPointAt(End.StartTime).BeatLength * 2);
 
-            double currentMaxEndTime = double.MinValue;
+            if (breakEndTime - breakStartTime < BreakPeriod.MIN_BREAK_DURATION)
+                return;
 
-            for (int i = 1; i < Beatmap.HitObjects.Count; ++i)
-            {
-                var previousObject = Beatmap.HitObjects[i - 1];
-                var nextObject = Beatmap.HitObjects[i];
+            var breakPeriod = new BreakPeriod(breakStartTime, breakEndTime);
 
-                // Keep track of the maximum end time encountered thus far.
-                // This handles cases like osu!mania's hold notes, which could have concurrent other objects after their start time.
-                // Note that we're relying on the implicit assumption that objects are sorted by start time,
-                // which is why similar tracking is not done for start time.
-                currentMaxEndTime = Math.Max(currentMaxEndTime, previousObject.GetEndTime());
-
-                if (nextObject.StartTime - currentMaxEndTime < BreakPeriod.MIN_GAP_DURATION)
-                    continue;
-
-                double breakStartTime = currentMaxEndTime + BreakPeriod.GAP_BEFORE_BREAK;
-
-                double breakEndTime = nextObject.StartTime;
-
-                if (nextObject is IHasTimePreempt hasTimePreempt)
-                    breakEndTime -= hasTimePreempt.TimePreempt;
-                else
-                    breakEndTime -= Math.Max(BreakPeriod.GAP_AFTER_BREAK, Beatmap.ControlPointInfo.TimingPointAt(nextObject.StartTime).BeatLength * 2);
-
-                if (breakEndTime - breakStartTime < BreakPeriod.MIN_BREAK_DURATION)
-                    continue;
-
-                var breakPeriod = new BreakPeriod(breakStartTime, breakEndTime);
-
-                if (Beatmap.Breaks.Any(b => b.Intersects(breakPeriod)))
-                    continue;
-
-                Beatmap.Breaks.Add(breakPeriod);
-            }
+            Beatmap.Breaks.Add(breakPeriod);
         }
 
         private void ensureNewComboAfterBreaks()
