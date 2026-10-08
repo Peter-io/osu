@@ -53,6 +53,11 @@ namespace osu.Game.Screens.Edit
         public event Action<HitObject> HitObjectUpdated;
 
         /// <summary>
+        /// Invoked when a <see cref="HitObject"/> is moved in time.
+        /// </summary>
+        public event Action<HitObject> HitObjectShifted;
+
+        /// <summary>
         /// Invoked after any state changes occurred which triggered a beatmap reprocess via an <see cref="IBeatmapProcessor"/>.
         /// </summary>
         /// <remarks>
@@ -320,6 +325,8 @@ namespace osu.Game.Screens.Edit
 
         private readonly HashSet<HitObject> batchPendingUpdates = new HashSet<HitObject>();
 
+        private readonly HashSet<HitObject> batchPendingShifts = new HashSet<HitObject>();
+
         /// <summary>
         /// Perform the provided action on every selected hitobject.
         /// Changes will be grouped as one history action.
@@ -504,11 +511,15 @@ namespace osu.Game.Screens.Edit
             var updates = batchPendingUpdates.ToArray();
             batchPendingUpdates.Clear();
 
+            var shifts = batchPendingShifts.ToArray();
+            batchPendingShifts.Clear();
+
             foreach (var h in deletes) SelectedHitObjects.Remove(h);
 
             foreach (var h in deletes) HitObjectRemoved?.Invoke(h);
             foreach (var h in inserts) HitObjectAdded?.Invoke(h);
             foreach (var h in updates) HitObjectUpdated?.Invoke(h);
+            foreach (var h in shifts) HitObjectShifted?.Invoke(h);
 
             updateInProgress.Value = false;
         }
@@ -530,6 +541,8 @@ namespace osu.Game.Screens.Edit
 
                 int insertionIndex = findInsertionIndex(PlayableBeatmap.HitObjects, hitObject.StartTime);
                 mutableHitObjects.Insert(insertionIndex + 1, hitObject);
+
+                batchPendingShifts.Add(hitObject);
 
                 Update(hitObject);
             };
