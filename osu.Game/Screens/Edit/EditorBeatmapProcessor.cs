@@ -50,21 +50,23 @@ namespace osu.Game.Screens.Edit
 
         private void updateBreak(HitObject currentObject)
         {
-            HitObject? previousObject = Beatmap.HitObjects.LastOrDefault(h => h.GetEndTime() < currentObject.StartTime);
-            HitObject? nextObject = Beatmap.HitObjects.FirstOrDefault(h => h.StartTime > currentObject.StartTime);
+            int currentObjectIndex = Beatmap.FindIndex(currentObject);
 
-            if (Beatmap.FindIndex(currentObject) < 0)
+            if (currentObjectIndex < 0)
             {
+                HitObject? previousObject = Beatmap.HitObjects.LastOrDefault(h => h.GetEndTime() < currentObject.StartTime);
+                HitObject? nextObject = Beatmap.HitObjects.FirstOrDefault(h => h.StartTime > currentObject.StartTime);
+
                 if ((previousObject ?? nextObject) is HitObject validObject) updateBreak(validObject);
                 else Beatmap.Breaks.Clear();
 
                 return;
             }
 
-            if (previousObject != null) insertBreakBetweenObjects(previousObject, currentObject);
+            if (currentObjectIndex > 0) insertBreakBetweenObjects(Beatmap.HitObjects[currentObjectIndex - 1], currentObject);
             else Beatmap.Breaks.RemoveAll(b => b.StartTime < currentObject.StartTime);
 
-            if (nextObject != null) insertBreakBetweenObjects(currentObject, nextObject);
+            if (currentObjectIndex < Beatmap.HitObjects.Count - 1) insertBreakBetweenObjects(currentObject, Beatmap.HitObjects[currentObjectIndex + 1]);
             else Beatmap.Breaks.RemoveAll(b => b.StartTime > currentObject.StartTime);
         }
 
