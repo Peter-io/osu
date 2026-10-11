@@ -117,7 +117,30 @@ namespace osu.Game.Screens.Edit
             foreach (var obj in HitObjects)
                 trackStartTime(obj);
 
-            Breaks = new BindableList<BreakPeriod>(playableBeatmap.Breaks);
+            Breaks = new BindableList<BreakPeriod>();
+
+            for (int b = 0; b < playableBeatmap.Breaks.Count; b++)
+            {
+                BreakPeriod beatmapBreak = playableBeatmap.Breaks[b];
+
+                bool isManualBreak = true;
+
+                for (int i = 1; i < playableBeatmap.HitObjects.Count; ++i)
+                {
+                    var previousObject = playableBeatmap.HitObjects[i - 1];
+                    var nextObject = playableBeatmap.HitObjects[i];
+
+                    if ((beatmapBreak.StartTime - previousObject.GetEndTime()) == BreakPeriod.GAP_BEFORE_BREAK
+                        && (nextObject.StartTime - beatmapBreak.EndTime) == ((nextObject as IHasTimePreempt)?.TimePreempt ?? Math.Max(BreakPeriod.GAP_AFTER_BREAK, playableBeatmap.ControlPointInfo.TimingPointAt(nextObject.StartTime).BeatLength * 2)))
+                    {
+                        isManualBreak = false;
+                        break;
+                    }
+                }
+
+                Breaks.Add(isManualBreak ? new ManualBreakPeriod(beatmapBreak.StartTime, beatmapBreak.EndTime) : beatmapBreak);
+            }
+
             Breaks.BindCollectionChanged((_, _) =>
             {
                 playableBeatmap.Breaks.Clear();
