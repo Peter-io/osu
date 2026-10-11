@@ -325,23 +325,23 @@ namespace osu.Game.Tests.Editing
         public void TestManualBreakAfterPreempt()
         {
             var controlPoints = new ControlPointInfo();
-            controlPoints.Add(0, new TimingControlPoint { BeatLength = 545 });
+            controlPoints.Add(0, new TimingControlPoint { BeatLength = 500 });
             var beatmap = new EditorBeatmap(new Beatmap
             {
                 ControlPointInfo = controlPoints,
                 BeatmapInfo = { Ruleset = new OsuRuleset().RulesetInfo },
                 Difficulty =
                 {
-                    ApproachRate = 3,
+                    ApproachRate = 0,
                 },
                 HitObjects =
                 {
-                    new HitCircle { StartTime = 640 },
-                    new HitCircle { StartTime = 5637 },
+                    new HitCircle { StartTime = 2000 },
+                    new HitCircle { StartTime = 6000 },
                 },
                 Breaks =
                 {
-                    new BreakPeriod(4401, 5152),
+                    new BreakPeriod(6000 - OsuHitObject.PREEMPT_MAX + 1, 6000 - BreakPeriod.GAP_AFTER_BREAK),
                 }
             });
 
@@ -356,8 +356,8 @@ namespace osu.Game.Tests.Editing
             Assert.Multiple(() =>
             {
                 Assert.That(beatmap.Breaks, Has.Count.EqualTo(1));
-                Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(4401));
-                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(5152));
+                Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(6000 - OsuHitObject.PREEMPT_MAX + 1));
+                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(6000 - BreakPeriod.GAP_AFTER_BREAK));
             });
         }
 
