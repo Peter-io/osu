@@ -31,6 +31,11 @@ namespace osu.Game.Beatmaps.Timing
         public const double MIN_GAP_DURATION = GAP_BEFORE_BREAK + MIN_BREAK_DURATION + GAP_AFTER_BREAK;
 
         /// <summary>
+        /// The maximum duration of a gap between two objects allowed to exist without a break.
+        /// </summary>
+        public const double MAX_GAP_DURATION = 5000;
+
+        /// <summary>
         /// The break start time.
         /// </summary>
         public double StartTime { get; }
@@ -69,6 +74,8 @@ namespace osu.Game.Beatmaps.Timing
         public bool Contains(double time) => time >= StartTime && time <= EndTime - BreakOverlay.BREAK_FADE_DURATION;
 
         public bool Intersects(BreakPeriod other) => StartTime <= other.EndTime && EndTime >= other.StartTime;
+
+        public bool Intersects(double startTime, double endTime) => StartTime <= endTime && EndTime >= startTime;
 
         public virtual bool Equals(BreakPeriod? other) =>
             other != null
