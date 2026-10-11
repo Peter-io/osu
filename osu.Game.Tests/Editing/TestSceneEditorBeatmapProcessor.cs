@@ -167,14 +167,12 @@ namespace osu.Game.Tests.Editing
                     new Note { StartTime = 1000 },
                     new Note { StartTime = 9000 },
                 },
-                Breaks =
-                {
-                    new BreakPeriod(1200, 4000),
-                    new BreakPeriod(5200, 8000),
-                }
             });
 
             var beatmapProcessor = new EditorBeatmapProcessor(beatmap, new OsuRuleset());
+
+            beatmap.Breaks.AddRange([new BreakPeriod(1200, 4000), new BreakPeriod(5200, 8000)]);
+
             beatmapProcessor.PreProcess();
             beatmapProcessor.PostProcess();
 
