@@ -322,6 +322,46 @@ namespace osu.Game.Tests.Editing
         }
 
         [Test]
+        public void TestManualBreakAfterPreempt()
+        {
+            var controlPoints = new ControlPointInfo();
+            controlPoints.Add(0, new TimingControlPoint { BeatLength = 545 });
+            var beatmap = new EditorBeatmap(new Beatmap
+            {
+                ControlPointInfo = controlPoints,
+                BeatmapInfo = { Ruleset = new OsuRuleset().RulesetInfo },
+                Difficulty =
+                {
+                    ApproachRate = 3,
+                },
+                HitObjects =
+                {
+                    new HitCircle { StartTime = 640 },
+                    new HitCircle { StartTime = 5637 },
+                },
+                Breaks =
+                {
+                    new BreakPeriod(4401, 5152),
+                }
+            });
+
+            foreach (var ho in beatmap.HitObjects)
+                ho.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            var beatmapProcessor = new EditorBeatmapProcessor(beatmap, new OsuRuleset());
+
+            beatmapProcessor.PreProcess();
+            beatmapProcessor.PostProcess();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(beatmap.Breaks, Has.Count.EqualTo(1));
+                Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(4401));
+                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(5152));
+            });
+        }
+
+        [Test]
         public void TestManualBreaksAreNotNudged()
         {
             var controlPoints = new ControlPointInfo();
