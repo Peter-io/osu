@@ -137,7 +137,7 @@ namespace osu.Game.Tests.Editing
                 HitObjects =
                 {
                     new Note { StartTime = 1000 },
-                    new Note { StartTime = 5000 },
+                    new Note { StartTime = 6000 },
                 }
             });
 
@@ -149,7 +149,7 @@ namespace osu.Game.Tests.Editing
             {
                 Assert.That(beatmap.Breaks, Has.Count.EqualTo(1));
                 Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(1200));
-                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(4000));
+                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(5000));
             });
         }
 
@@ -506,7 +506,7 @@ namespace osu.Game.Tests.Editing
                 HitObjects =
                 {
                     new HitCircle { StartTime = 1000 },
-                    new HitCircle { StartTime = 5000 },
+                    new HitCircle { StartTime = 6000 },
                 }
             });
 
@@ -521,7 +521,7 @@ namespace osu.Game.Tests.Editing
             {
                 Assert.That(beatmap.Breaks, Has.Count.EqualTo(1));
                 Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(1200));
-                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(5000 - OsuHitObject.PREEMPT_MIN));
+                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(6000 - OsuHitObject.PREEMPT_MIN));
             });
 
             beatmap.Difficulty.ApproachRate = 0;
@@ -536,7 +536,7 @@ namespace osu.Game.Tests.Editing
             {
                 Assert.That(beatmap.Breaks, Has.Count.EqualTo(1));
                 Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(1200));
-                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(5000 - OsuHitObject.PREEMPT_MAX));
+                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(6000 - OsuHitObject.PREEMPT_MAX));
             });
         }
 
@@ -599,7 +599,7 @@ namespace osu.Game.Tests.Editing
                 HitObjects =
                 {
                     new HitCircle { StartTime = 1000, NewCombo = true },
-                    new HitCircle { StartTime = 5000 },
+                    new HitCircle { StartTime = 6000 },
                 },
             });
 
