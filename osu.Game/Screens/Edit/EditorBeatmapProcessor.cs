@@ -53,15 +53,24 @@ namespace osu.Game.Screens.Edit
 
             objectDurationCache = objectDuration;
 
+            var previousBreaks = Beatmap.Breaks.ToArray();
+
             Beatmap.Breaks.RemoveAll(b => b is not ManualBreakPeriod);
 
             foreach (var manualBreak in Beatmap.Breaks.ToList())
             {
-                if (manualBreak.EndTime <= Beatmap.HitObjects.FirstOrDefault()?.StartTime
-                    || manualBreak.StartTime >= Beatmap.GetLastObjectTime()
-                    || Beatmap.HitObjects.Any(ho => ho.StartTime <= manualBreak.EndTime && ho.GetEndTime() >= manualBreak.StartTime))
-                {
+                if (manualBreak.EndTime <= Beatmap.HitObjects.FirstOrDefault()?.StartTime || manualBreak.StartTime >= Beatmap.GetLastObjectTime()
+                    || manualBreak.Duration < BreakPeriod.MIN_BREAK_DURATION)
                     Beatmap.Breaks.Remove(manualBreak);
+
+                foreach (var hitObject in Beatmap.HitObjects)
+                {
+                    if (hitObject.StartTime <= manualBreak.EndTime && hitObject.GetEndTime() >= manualBreak.StartTime
+                        || Math.Abs(manualBreak.StartTime - hitObject.GetEndTime()) < BreakPeriod.GAP_BEFORE_BREAK
+                        || Math.Abs(hitObject.StartTime - manualBreak.EndTime) < BreakPeriod.GAP_AFTER_BREAK)
+                    {
+                        Beatmap.Breaks.Remove(manualBreak);
+                    }
                 }
             }
 
@@ -78,7 +87,9 @@ namespace osu.Game.Screens.Edit
                 // which is why similar tracking is not done for start time.
                 currentMaxEndTime = Math.Max(currentMaxEndTime, previousObject.GetEndTime());
 
-                if (nextObject.StartTime - currentMaxEndTime < BreakPeriod.MIN_GAP_DURATION)
+                if (nextObject.StartTime - currentMaxEndTime < BreakPeriod.MAX_GAP_DURATION
+                    && !previousBreaks.Any(b => b.Intersects(currentMaxEndTime, nextObject.StartTime))
+                    || Beatmap.Breaks.Any(b => b.Intersects(previousObject.GetEndTime(), nextObject.StartTime)))
                     continue;
 
                 double breakStartTime = currentMaxEndTime + BreakPeriod.GAP_BEFORE_BREAK;
@@ -94,9 +105,6 @@ namespace osu.Game.Screens.Edit
                     continue;
 
                 var breakPeriod = new BreakPeriod(breakStartTime, breakEndTime);
-
-                if (Beatmap.Breaks.Any(b => b.Intersects(breakPeriod)))
-                    continue;
 
                 Beatmap.Breaks.Add(breakPeriod);
             }
