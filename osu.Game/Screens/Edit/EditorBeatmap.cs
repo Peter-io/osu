@@ -129,7 +129,7 @@ namespace osu.Game.Screens.Edit
                     var nextObject = playableBeatmap.HitObjects[i];
 
                     if ((beatmapBreak.StartTime - previousObject.GetEndTime()) == BreakPeriod.GAP_BEFORE_BREAK
-                        && (nextObject.StartTime - beatmapBreak.EndTime) == ((nextObject as IHasTimePreempt)?.TimePreempt ?? Math.Max(BreakPeriod.GAP_AFTER_BREAK, playableBeatmap.ControlPointInfo.TimingPointAt(nextObject.StartTime).BeatLength * 2)))
+                        && (nextObject.StartTime - beatmapBreak.EndTime) == ((nextObject as IHasTimePreempt)?.TimePreempt ?? Math.Max(BreakPeriod.GAP_AFTER_BREAK, ControlPointInfo.TimingPointAt(nextObject.StartTime).BeatLength * 2)))
                     {
                         isManualBreak = false;
                         break;
