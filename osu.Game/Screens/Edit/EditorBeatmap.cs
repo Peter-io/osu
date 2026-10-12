@@ -128,8 +128,8 @@ namespace osu.Game.Screens.Edit
                     var previousObject = playableBeatmap.HitObjects[i - 1];
                     var nextObject = playableBeatmap.HitObjects[i];
 
-                    if ((beatmapBreak.StartTime - previousObject.GetEndTime()) == BreakPeriod.GAP_BEFORE_BREAK
-                        && (nextObject.StartTime - beatmapBreak.EndTime) == ((nextObject as IHasTimePreempt)?.TimePreempt ?? Math.Max(BreakPeriod.GAP_AFTER_BREAK, playableBeatmap.ControlPointInfo.TimingPointAt(nextObject.StartTime).BeatLength * 2)))
+                    if ((beatmapBreak.StartTime - previousObject.GetEndTime()) == GetGapBeforeBreak()
+                        && (nextObject.StartTime - beatmapBreak.EndTime) == GetGapAfterBreak(nextObject))
                     {
                         isManualBreak = false;
                         break;
@@ -618,6 +618,10 @@ namespace osu.Game.Screens.Edit
         public double GetBeatLengthAtTime(double referenceTime) => ControlPointInfo.TimingPointAt(referenceTime).BeatLength / BeatDivisor;
 
         public int BeatDivisor => beatDivisor?.Value ?? 1;
+
+        public double GetGapBeforeBreak() => BreakPeriod.GAP_BEFORE_BREAK;
+
+        public double GetGapAfterBreak(HitObject hitObject) => ((hitObject as IHasTimePreempt)?.TimePreempt ?? Math.Max(BreakPeriod.GAP_AFTER_BREAK, ControlPointInfo.TimingPointAt(hitObject.StartTime).BeatLength * 2));
 
         protected override void Dispose(bool isDisposing)
         {

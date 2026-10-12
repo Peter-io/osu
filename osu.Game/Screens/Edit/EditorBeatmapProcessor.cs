@@ -94,12 +94,7 @@ namespace osu.Game.Screens.Edit
 
                 double breakStartTime = currentMaxEndTime + BreakPeriod.GAP_BEFORE_BREAK;
 
-                double breakEndTime = nextObject.StartTime;
-
-                if (nextObject is IHasTimePreempt hasTimePreempt)
-                    breakEndTime -= hasTimePreempt.TimePreempt;
-                else
-                    breakEndTime -= Math.Max(BreakPeriod.GAP_AFTER_BREAK, Beatmap.ControlPointInfo.TimingPointAt(nextObject.StartTime).BeatLength * 2);
+                double breakEndTime = nextObject.StartTime - Beatmap.GetGapAfterBreak(nextObject);
 
                 if (breakEndTime - breakStartTime < BreakPeriod.MIN_BREAK_DURATION)
                     continue;
