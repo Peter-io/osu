@@ -119,10 +119,8 @@ namespace osu.Game.Screens.Edit
 
             Breaks = new BindableList<BreakPeriod>();
 
-            for (int b = 0; b < playableBeatmap.Breaks.Count; b++)
+            foreach (var beatmapBreak in playableBeatmap.Breaks)
             {
-                BreakPeriod beatmapBreak = playableBeatmap.Breaks[b];
-
                 bool isManualBreak = true;
 
                 for (int i = 1; i < playableBeatmap.HitObjects.Count; ++i)
