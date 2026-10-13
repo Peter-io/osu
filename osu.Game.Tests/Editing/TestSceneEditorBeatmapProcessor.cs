@@ -267,8 +267,8 @@ namespace osu.Game.Tests.Editing
                 },
                 Breaks =
                 {
-                    new ManualBreakPeriod(1200, 4000),
-                    new ManualBreakPeriod(5200, 8000),
+                    new BreakPeriod(1200, 4000),
+                    new BreakPeriod(5200, 8000),
                 }
             });
 
@@ -303,7 +303,7 @@ namespace osu.Game.Tests.Editing
                 },
                 Breaks =
                 {
-                    new ManualBreakPeriod(1200, 8000),
+                    new BreakPeriod(1200, 8000),
                 }
             });
 
@@ -377,7 +377,7 @@ namespace osu.Game.Tests.Editing
                 },
                 Breaks =
                 {
-                    new ManualBreakPeriod(1200, 6000),
+                    new BreakPeriod(1200, 6000),
                 }
             });
 
@@ -436,7 +436,7 @@ namespace osu.Game.Tests.Editing
                 },
                 Breaks =
                 {
-                    new ManualBreakPeriod(10000, 15000),
+                    new BreakPeriod(10000, 15000),
                 }
             });
 
@@ -463,7 +463,7 @@ namespace osu.Game.Tests.Editing
                 },
                 Breaks =
                 {
-                    new ManualBreakPeriod(10000, 15000),
+                    new BreakPeriod(10000, 15000),
                 }
             });
 
@@ -517,7 +517,7 @@ namespace osu.Game.Tests.Editing
                 },
                 Breaks =
                 {
-                    new ManualBreakPeriod(0, 9000),
+                    new BreakPeriod(0, 9000),
                 }
             });
 
