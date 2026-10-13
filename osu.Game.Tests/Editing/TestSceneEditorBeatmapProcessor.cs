@@ -1,7 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Linq;
 using NUnit.Framework;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
@@ -395,7 +394,7 @@ namespace osu.Game.Tests.Editing
         }
 
         [Test]
-        public void TestInvalidManualBreaksAreRemoved()
+        public void TestInvalidManualBreaksAreReplaced()
         {
             var controlPoints = new ControlPointInfo();
             controlPoints.Add(0, new TimingControlPoint { BeatLength = 500 });
@@ -419,7 +418,12 @@ namespace osu.Game.Tests.Editing
             beatmapProcessor.PreProcess();
             beatmapProcessor.PostProcess();
 
-            Assert.That(beatmap.Breaks.Any(b => b is ManualBreakPeriod), Is.False);
+            Assert.Multiple(() =>
+            {
+                Assert.That(beatmap.Breaks, Has.Count.EqualTo(1));
+                Assert.That(beatmap.Breaks[0].StartTime, Is.EqualTo(1000 + BreakPeriod.GAP_BEFORE_BREAK));
+                Assert.That(beatmap.Breaks[0].EndTime, Is.EqualTo(5000 - 1000));
+            });
         }
 
         [Test]
