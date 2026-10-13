@@ -61,7 +61,10 @@ namespace osu.Game.Screens.Edit
             {
                 if (manualBreak.EndTime <= Beatmap.HitObjects.FirstOrDefault()?.StartTime || manualBreak.StartTime >= Beatmap.GetLastObjectTime()
                     || manualBreak.Duration < BreakPeriod.MIN_BREAK_DURATION)
+                {
                     Beatmap.Breaks.Remove(manualBreak);
+                    continue;
+                }
 
                 foreach (var hitObject in Beatmap.HitObjects)
                 {
@@ -70,6 +73,7 @@ namespace osu.Game.Screens.Edit
                         || Math.Abs(hitObject.StartTime - manualBreak.EndTime) < BreakPeriod.GAP_AFTER_BREAK)
                     {
                         Beatmap.Breaks.Remove(manualBreak);
+                        break;
                     }
                 }
             }
