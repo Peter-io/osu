@@ -35,6 +35,8 @@ namespace osu.Game.Beatmaps.Timing
         /// </summary>
         public const double MAX_GAP_DURATION = 5000;
 
+        public const double AUTO_BREAK_LENIENCY = 1;
+
         /// <summary>
         /// The break start time.
         /// </summary>
